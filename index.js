@@ -1,20 +1,31 @@
-const http = require('http')
-const debugMode = true;
+// load the config file
+const config = require("./config.json")
 
+// require all needed libraries
+const http = require('http')
+
+// create our local database
+let errorDB = {}
+
+// the debug print function
+let debugMode = config.debugMode
 function debug(...args) {
     if (!debugMode) return;
     console.log("[DEBUG] ", ...args)
 }
 
-function processErrorData(data) {
-    let dataArray = data.split("&")
+// the error data is passed as a string like get request params
+// this is why we process it into a array via this function
+function processErrorData(params) {
+    let dataArray = params.split("&")
     for (let i = 0; i < dataArray.length; i++) {
+        // array position 0 = idenifier
+        // array position 1 = value
         dataArray[i] = dataArray[i].split("=")
     }
     return dataArray
 }
 
-let errorDB = {}
 const server = http.createServer(function (request, response) {
     if (request.method == 'POST') {
         debug("Received Post Request")
@@ -37,7 +48,7 @@ const server = http.createServer(function (request, response) {
     }
 })
 
-const port = 3000
-const host = '127.0.0.1'
+const port = config.port
+const host = config.ip
 server.listen(port, host)
 console.log(`Listening at http://${host}:${port}`)
