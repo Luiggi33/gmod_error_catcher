@@ -5,7 +5,7 @@ const config = require("./config.json")
 const http = require('http')
 
 // create our local database
-let errorDB = {}
+let errorDB = []
 
 // the debug print function
 let debugMode = config.debugMode
@@ -18,18 +18,20 @@ function debug(...args) {
 // this is why we process it into a array via this function
 function processErrorData(params) {
     let dataArray = params.split("&")
+    let dataDict = {}
     for (let i = 0; i < dataArray.length; i++) {
         // array position 0 = idenifier
         // array position 1 = value
-        dataArray[i] = dataArray[i].split("=")
+        let temp = dataArray[i].split("=")
+        dataDict[temp[0]] = temp[1]
     }
-    return dataArray
+    return dataDict
 }
 
 const server = http.createServer(function (request, response) {
     if (request.method == 'POST') {
         debug("Received Post Request")
-        var body = ''
+        let body = ''
         request.on('data', function (data) {
             body += data
         })
@@ -37,14 +39,20 @@ const server = http.createServer(function (request, response) {
             errorDB.push(processErrorData(body))
         })
     } else if (request.method == 'GET') {
-        var html = `
-            <html>
-                <body>
-                    <h1>ToDO</h1>
-                </body>
-            </html>`
-        response.writeHead(200, { 'Content-Type': 'text/html' })
-        response.end(html)
+        let url = request.url
+        if (url == "/") {
+            response.writeHead(200, { 'Content-Type': 'text/html' })
+            response.write("<h1>Server is running</h1>")
+            response.end()
+        } else if (url == "/errors") {
+            response.writeHead(200, { 'Content-Type': 'application/json' })
+            response.write(JSON.stringify(errorDB))
+            response.end()
+        } else {
+            response.writeHead(404, { 'Content-Type': 'text/html' })
+            response.write("<h1>404 Not Found</h1>")
+            response.end()
+        }
     }
 })
 
