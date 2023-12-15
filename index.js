@@ -23,6 +23,7 @@ function processErrorData(params) {
         // array position 0 = idenifier
         // array position 1 = value
         let temp = dataArray[i].split("=")
+        if (temp[0] == "error") temp[1] = decodeURIComponent(temp[1])
         dataDict[temp[0]] = temp[1]
     }
     return dataDict
