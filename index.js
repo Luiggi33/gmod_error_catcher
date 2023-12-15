@@ -32,6 +32,27 @@ function processErrorData(params) {
     return dataDict
 }
 
+const css = `
+body {
+    background-color: #2f2f2f;
+    color: #fff;
+    font-family: sans-serif;
+}
+h1 {
+    color: #fff;
+    text-align: center;
+}
+h2 {
+    color: #fff;
+}
+p {
+    color: #fff;
+}
+pre {
+    color: #fff;
+}
+`
+
 const server = http.createServer(function (request, response) {
     if (request.method == 'POST') {
         debug("Received Post Request")
@@ -48,6 +69,7 @@ const server = http.createServer(function (request, response) {
         let url = request.url
         if (url == "/") {
             response.writeHead(200, { 'Content-Type': 'text/html' })
+            response.write("<style>" + css + "</style>")
             response.write("<h1>Server is running</h1>")
             response.end()
         } else if (url == "/errors") {
@@ -56,13 +78,14 @@ const server = http.createServer(function (request, response) {
             response.end()
         } else if (url == "/errorview") {
             response.writeHead(200, { 'Content-Type': 'text/html' })
+            response.write("<style>" + css + "</style>")
             response.write("<h1>Errors</h1>")
             response.write("<p>There are " + errorDB.length + " errors</p>")
             for (let i = 0; i < errorDB.length; i++) {
                 let error = errorDB[i]
                 response.write("<h2> Error " + (i + 1) + "</h2>")
-                response.write("<p> Error: " + error.error + "</p>")
-                response.write("<p> Stack</p>")
+                response.write("<p> Error with stack:</p>")
+                response.write("<pre>" + error.error + "</pre>")
                 response.write("<pre>" + error.stack + "</pre>")
                 response.write("<p> Date: " + error.date + "</p>")
             }
